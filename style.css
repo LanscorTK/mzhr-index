@@ -254,12 +254,16 @@ body {
 }
 .seal-text {
   font-family: var(--font-pop);
-  font-size: 26px;
-  letter-spacing: 5px;
+  font-size: 22px;
+  letter-spacing: 7px;
   fill: currentColor;
 }
 .seal-heart {
-  font-size: 56px;
+  font-size: 52px;
+  fill: currentColor;
+}
+.seal-deco {
+  font-size: 13px;
   fill: currentColor;
 }
 

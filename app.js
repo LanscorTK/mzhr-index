@@ -14,8 +14,24 @@ const CONFIG = {
   ],
 };
 
+const DATA_BASE = 'https://raw.githubusercontent.com/LanscorTK/mzhr-index/data';
+
 // ====== 数据源 ======
 async function fetchRate() {
+  // 首选：仓库 data 分支（GitHub Actions 约每10分钟抓一次 Yahoo Finance 盘中价）
+  try {
+    const res = await fetch(`${DATA_BASE}/rate.json`, { cache: 'no-cache' });
+    const data = await res.json();
+    const rate = Number(data.rate);
+    if (Number.isFinite(rate) && rate > 15 && rate < 40) {
+      return {
+        rate,
+        date: new Date(data.time * 1000),
+        source: 'Yahoo Finance（盘中价，约每10分钟更新）',
+        showTime: true,
+      };
+    }
+  } catch { /* 落到下面的日更源 */ }
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/CNY');
     const data = await res.json();
@@ -79,7 +95,7 @@ const fmt = (n, digits = 2) => n.toLocaleString('zh-CN', {
 });
 
 // ====== 渲染 ======
-function render({ rate, date, source }) {
+function render({ rate, date, source, showTime }) {
   const r = compute(rate);
   const $ = id => document.getElementById(id);
   const displayDate = date ?? new Date();
@@ -126,13 +142,41 @@ function render({ rate, date, source }) {
     $('progress-heart').style.left = `${pct}%`;
   });
 
-  $('data-source').textContent = `数据来源：${source}${date ? ` · 数据时间 ${date.toISOString().slice(0, 10)}` : ''}`;
+  const dateText = !date ? ''
+    : showTime
+      ? ` · 数据时间 ${date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}`
+      : ` · 数据时间 ${date.toISOString().slice(0, 10)}`;
+  $('data-source').textContent = `数据来源：${source}${dateText}`;
 
   document.getElementById('seal').classList.add('stamped');
 }
 
-// ====== 启动 ======
-document.getElementById('chizuru-img').src =
-  CONFIG.images[Math.floor(Math.random() * CONFIG.images.length)];
+// ====== 看板娘：远程图池随机（不与上次重复），失败回退本地 ======
+async function pickImage() {
+  let pool = CONFIG.images;
+  try {
+    const res = await fetch(`${DATA_BASE}/images.json`, { cache: 'no-cache' });
+    const list = await res.json();
+    const valid = Array.isArray(list)
+      ? list.filter(u => typeof u === 'string' && u.startsWith('https://'))
+      : [];
+    if (valid.length) pool = valid;
+  } catch { /* 用本地图池 */ }
 
+  const last = localStorage.getItem('mzhr-last-img');
+  const candidates = pool.length > 1 ? pool.filter(u => u !== last) : pool;
+  const src = candidates[Math.floor(Math.random() * candidates.length)];
+
+  const img = document.getElementById('chizuru-img');
+  img.onerror = () => {
+    img.onerror = null;
+    const locals = CONFIG.images.filter(u => u !== src);
+    img.src = locals[Math.floor(Math.random() * locals.length)];
+  };
+  img.src = src;
+  localStorage.setItem('mzhr-last-img', src);
+}
+
+// ====== 启动 ======
+pickImage();
 fetchRate().then(render);

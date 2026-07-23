@@ -1,0 +1,72 @@
+name: update-data
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch rate and image pool
+        run: |
+          mkdir -p out
+
+          # ---- 汇率：Yahoo Finance 盘中价 ----
+          rate_json=$(curl -sf --max-time 20 -H "User-Agent: Mozilla/5.0" \
+            "https://query1.finance.yahoo.com/v8/finance/chart/CNYJPY=X?range=1d&interval=5m") || rate_json=""
+          rate=$(echo "$rate_json" | jq -r '.chart.result[0].meta.regularMarketPrice // empty' 2>/dev/null)
+          ts=$(echo "$rate_json" | jq -r '.chart.result[0].meta.regularMarketTime // empty' 2>/dev/null)
+          # 合法性校验：先验格式（防止响应内容注入 awk），再验 15~40 区间
+          if echo "$rate" | grep -Eq '^[0-9]+(\.[0-9]+)?$' && echo "$ts" | grep -Eq '^[0-9]+$' \
+            && awk "BEGIN{exit !($rate > 15 && $rate < 40)}"; then
+            jq -n --argjson rate "$rate" --argjson time "$ts" \
+              '{rate: $rate, time: $time, source: "Yahoo Finance"}' > out/rate.json
+            echo "rate: $rate @ $ts"
+          else
+            echo "rate fetch failed or out of range, keeping previous"
+          fi
+
+          # ---- 图池：safebooru 千鹤 solo 全年龄竖图 ----
+          imgs=$(curl -sf --max-time 30 \
+            "https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=mizuhara_chizuru+solo&limit=100&json=1") || imgs=""
+          if [ -n "$imgs" ]; then
+            echo "$imgs" | jq '[.[]
+              | select(.rating == "general" and .width >= 700 and .height >= .width)
+              | (.sample_url // .file_url)
+              | select(type == "string" and startswith("https://"))
+            ] | .[0:100]' > out/images.json 2>/dev/null || rm -f out/images.json
+            [ -f out/images.json ] && echo "images: $(jq length out/images.json)"
+          else
+            echo "image fetch failed, keeping previous"
+          fi
+
+      - name: Push to data branch
+        run: |
+          cd out
+          # 某项抓取失败时，从现有 data 分支带回旧值，避免覆盖丢失
+          for f in rate.json images.json; do
+            if [ ! -f "$f" ]; then
+              curl -sf "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/data/$f" -o "$f" || true
+            fi
+          done
+          [ -f rate.json ] || [ -f images.json ] || { echo "nothing to publish"; exit 0; }
+
+          git init -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "data: $(date -u +%FT%TZ)"
+          # 单 commit 强推，data 分支历史永远只有一条，不膨胀仓库
+          git push --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
