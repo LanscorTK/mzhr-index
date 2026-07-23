@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>水源千鹤汇率通告</title>
+<meta name="description" content="水源千鹤指数实时通告：以2017年为基准，实时追踪日元兑人民币购买力变化。本页面仅供娱乐。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+</head>
+<body>
+
+<div class="petals" aria-hidden="true">
+  <span>🌸</span><span>🌸</span><span>🌸</span><span>🌸</span><span>🌸</span><span>🌸</span><span>🌸</span><span>🌸</span>
+</div>
+
+<main class="page">
+
+  <header class="masthead">
+    <p class="kicker">◆ KANOJO, OKARISHIMASU ◆ 彼女、お借りします ◆</p>
+    <h1 class="logo" aria-label="水源千鹤汇率通告">
+      <span>水</span><span>源</span><span>千</span><span>鹤</span><span class="dot">·</span><span>汇</span><span>率</span><span>通</span><span>告</span>
+    </h1>
+    <p class="issue-pill"><span id="issue-no">第—期</span> ｜ <span id="issue-date">加载中…</span></p>
+  </header>
+
+  <section class="hero">
+    <figure class="polaroid">
+      <img id="chizuru-img" src="" alt="水原千鹤">
+      <figcaption>本期看板娘 ♡ 水原千鹤</figcaption>
+    </figure>
+
+    <div class="index-panel">
+      <p class="index-label">今日千鹤指数</p>
+      <p class="index-value" id="index-value" aria-live="polite">…</p>
+      <p class="index-note" id="index-note">正在接入外汇市场，核算中…</p>
+
+      <div class="progress-card">
+        <p class="progress-title">终身套餐达成度 <span id="progress-text">—</span></p>
+        <div class="progress-track" role="progressbar" aria-label="终身套餐达成度" aria-valuemin="0" aria-valuemax="100" id="progress-bar-wrap">
+          <div class="progress-fill" id="progress-fill"></div>
+          <span class="progress-heart" id="progress-heart">💗</span>
+        </div>
+        <p class="progress-hint" id="clause"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bubble-wrap">
+    <div class="bubble">
+      <p class="bubble-tag">📢 事务所公告</p>
+      <p id="para-1">受汇率市场波动影响，今日水源千鹤指数已完成例行更新。</p>
+      <p id="para-2"></p>
+      <p id="para-3"></p>
+      <div class="stamp-row">
+        <svg class="seal" id="seal" viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <path id="seal-arc" d="M 100,100 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" fill="none"/>
+          </defs>
+          <circle cx="100" cy="100" r="92" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="4 7" stroke-linecap="round"/>
+          <text class="seal-text">
+            <textPath href="#seal-arc" startOffset="25%" text-anchor="middle">千鹤事务所 · 兑换认证</textPath>
+          </text>
+          <text x="100" y="118" text-anchor="middle" class="seal-heart">♡</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="details">
+    <h2 class="details-title">🎀 租借套餐换算明细</h2>
+    <ul class="detail-list">
+      <li><span class="d-icon">💰</span><span class="d-label">预算（人民币）</span><span class="d-value">388,000.00 元</span></li>
+      <li><span class="d-icon">💱</span><span class="d-label">实时汇率 CNY→JPY</span><span class="d-value" id="t-rate">—</span></li>
+      <li><span class="d-icon">💴</span><span class="d-label">可兑换日元</span><span class="d-value" id="t-jpy">—</span></li>
+      <li><span class="d-icon">💐</span><span class="d-label">专属陪伴单价</span><span class="d-value">200,000 日元 / 年</span></li>
+      <li><span class="d-icon">⏳</span><span class="d-label">折合陪伴时长</span><span class="d-value" id="t-years">—</span></li>
+      <li><span class="d-icon">📈</span><span class="d-label">较 2017 基准变动</span><span class="d-value" id="t-diff">—</span></li>
+    </ul>
+  </section>
+
+  <footer class="page-footer">
+    <p id="data-source">数据来源：—</p>
+    <p>本页面为粉丝娱乐项目，不构成任何投资或租借建议。图片版权归 ©宫岛礼吏·讲谈社 及原作者所有。</p>
+    <p><a href="https://github.com/LanscorTK/mzhr-index" rel="noopener">GitHub</a></p>
+  </footer>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

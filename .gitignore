@@ -1,0 +1,8 @@
+# Claude 相关
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.playwright-mcp/
+
+# 系统文件
+.DS_Store
